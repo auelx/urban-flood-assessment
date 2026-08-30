@@ -456,8 +456,8 @@
     async function loadGeoData() {
       try {
         const [boundaryRes, landmarkRes] = await Promise.all([
-          fetch('assets/barangay_boundaries.geojson'),
-          fetch('assets/landmarks.geojson')
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/barangay_boundaries.geojson'),
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/landmarks.geojson')
         ]);
         if (!boundaryRes.ok || !landmarkRes.ok) {
           throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status);
@@ -538,7 +538,7 @@
         });
       } catch (err) {
         const banner = document.getElementById('data-error');
-        banner.textContent = 'Could not load assessment data from assets/. Serve this folder over HTTP (e.g. "python -m http.server") and reload.';
+        banner.textContent = 'Could not load assessment data from GitHub. Check your connection and reload.';
         banner.classList.add('show');
       }
     }
