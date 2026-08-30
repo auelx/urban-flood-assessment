@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Leaflet Controls</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    body {
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Custom Control Container */
+    .custom-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: #ffffff;
+      color: #333333;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .control-btn i {
+      pointer-events: none;
+    }
+
+    .control-btn:hover {
+      background-color: #f3f4f6;
+      color: #000000;
+    }
+
+    .control-btn:not(:last-child) {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Modal Styling for Attribution */
+    .attribution-modal {
+      display: none;
+      position: absolute;
+      bottom: 0px;
+      right: 48px;
+      background: #ffffff;
+      padding: 12px 16px;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 12px;
+      color: #4b5563;
+      white-space: nowrap;
+    }
+
+    .attribution-modal a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .attribution-modal a:hover {
+      text-decoration: underline;
+    }
+
+    /* Layer Panel */
+    .layer-panel {
+      display: none;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 8px;
+      min-width: 180px;
+    }
+
+    .layer-panel.active {
+      display: block;
+    }
+
+    .layer-panel h3 {
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      padding: 4px 8px 8px;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px;
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      color: #333333;
+    }
+
+    .layer-row + .layer-row {
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .layer-row label {
+      cursor: pointer;
+    }
+
+    /* Switch Toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch .track {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 9999px;
+      transition: background-color 0.2s ease;
+      pointer-events: none;
+    }
+
+    .switch .track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .track {
+      background: #2563eb;
+    }
+
+    .switch input:checked + .track::after {
+      transform: translateX(14px);
+    }
+
+    .switch input:focus-visible + .track {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    #btn-layers {
+      border-radius: 8px;
+    }
+
+    #btn-info {
+      position: relative;
+    }
+
+    #btn-info summary {
+      list-style: none;
+      border-radius: 8px;
+      background-color: #ffffff;
+      color: #000;
+    }
+
+    #btn-info summary::-webkit-details-marker {
+      display: none;
+    }
+
+    #btn-info[open] .attribution-modal {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div class="custom-controls">
+
+    <div class="layer-panel" id="layer-panel">
+      <h3>Layers</h3>
+      <div id="layer-list"></div>
+    </div>
+
+    <button class="control-btn" id="btn-layers" title="Toggle layers panel" aria-pressed="false">
+        <i data-lucide="layers" width="20" height="20"></i>
+      </button>
+
+    <div class="control-group">
+      <button class="control-btn" id="btn-zoom-in" title="Zoom In">
+        <i data-lucide="plus" width="20" height="20"></i>
+      </button>
+      <button class="control-btn" id="btn-zoom-out" title="Zoom Out">
+        <i data-lucide="minus" width="20" height="20"></i>
+      </button>
+    </div>
+
+    <details id="btn-info">
+      <summary class="control-btn" title="Attribution Info" aria-label="Attribution Info" style="outline-style: none;">
+        <i data-lucide="info" width="20" height="20"></i>
+      </summary>
+      <span class="attribution-modal">
+        Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors
+      </span>
+    </details>
+      
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Initialize map with default controls disabled
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: false
+    }).setView([14.1122, 122.9553], 13);
+
+    // Define Available Layers
+    const layerDefs = [
+      {
+        id: 'street',
+        label: 'Street Map',
+        layer: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }),
+        visible: true
+      },
+      {
+        id: 'topo',
+        label: 'Topographic',
+        layer: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+          maxZoom: 17
+        }),
+        visible: false
+      }
+    ];
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Populate Layer Panel
+    const layerList = document.getElementById('layer-list');
+    layerDefs.forEach(def => {
+      const row = document.createElement('div');
+      row.className = 'layer-row';
+
+      const label = document.createElement('label');
+      label.textContent = def.label;
+      label.setAttribute('for', 'layer-' + def.id);
+
+      const toggle = document.createElement('label');
+      toggle.className = 'switch';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'layer-' + def.id;
+      checkbox.checked = def.visible;
+      const track = document.createElement('span');
+      track.className = 'track';
+      toggle.appendChild(checkbox);
+      toggle.appendChild(track);
+
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+          map.addLayer(def.layer);
+        } else {
+          map.removeLayer(def.layer);
+        }
+      });
+
+      row.appendChild(label);
+      row.appendChild(toggle);
+      layerList.appendChild(row);
+
+      if (def.visible) {
+        map.addLayer(def.layer);
+      }
+    });
+
+    // Control Event Listeners
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      map.zoomIn();
+    });
+
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      map.zoomOut();
+    });
+
+    const layerPanel = document.getElementById('layer-panel');
+    const btnLayers = document.getElementById('btn-layers');
+    btnLayers.addEventListener('click', () => {
+      const active = layerPanel.classList.toggle('active');
+      btnLayers.setAttribute('aria-pressed', String(active));
+    });
+  </script>
+</body>
+</html>
