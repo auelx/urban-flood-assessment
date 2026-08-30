@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Leaflet Controls</title>
+  <title>Urban Flood Assessment</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -27,6 +27,10 @@
 
     body {
       font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+    }
+
+    .leaflet-container {
+       font-family: 'Lexend', system-ui, -apple-system, sans-serif;
     }
 
     /* Custom Control Container */
@@ -99,6 +103,91 @@
 
     .attribution-modal a:hover {
       text-decoration: underline;
+    }
+
+    /* Barangay Hall Markers */
+    .hall-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .hall-marker img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Choropleth Legend */
+    .choropleth-legend {
+      display: none;
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      z-index: 1000;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 10px 12px;
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 11px;
+      color: #333333;
+    }
+
+    .choropleth-legend.show {
+      display: block;
+    }
+
+    .choropleth-legend h4 {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .choropleth-legend .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.6;
+    }
+
+    .choropleth-legend .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+
+    /* Data Load Error Banner */
+    .data-error {
+      display: none;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .data-error.show {
+      display: block;
     }
 
     /* Layer Panel */
@@ -254,6 +343,17 @@
 
   </div>
 
+  <div class="choropleth-legend" id="choropleth-legend">
+    <h4>Under 5 years (%)</h4>
+    <div class="legend-item"><span class="swatch" style="background: #22c55e;"></span> &lt; 8%</div>
+    <div class="legend-item"><span class="swatch" style="background: #a3e635;"></span> 8 &ndash; 10%</div>
+    <div class="legend-item"><span class="swatch" style="background: #facc15;"></span> 10 &ndash; 12%</div>
+    <div class="legend-item"><span class="swatch" style="background: #f97316;"></span> 12 &ndash; 14%</div>
+    <div class="legend-item"><span class="swatch" style="background: #b91c1c;"></span> &ge; 14%</div>
+  </div>
+
+  <div class="data-error" id="data-error"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
@@ -263,32 +363,19 @@
       attributionControl: false
     }).setView([14.1122, 122.9553], 13);
 
-    // Define Available Layers
-    const layerDefs = [
-      {
-        id: 'street',
-        label: 'Street Map',
-        layer: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }),
-        visible: true
-      },
-      {
-        id: 'topo',
-        label: 'Topographic',
-        layer: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-          maxZoom: 17
-        }),
-        visible: false
-      }
-    ];
-
     // Initialize Lucide Icons
     lucide.createIcons();
 
     // Populate Layer Panel
     const layerList = document.getElementById('layer-list');
-    layerDefs.forEach(def => {
+    const layerPanel = document.getElementById('layer-panel');
+    const btnLayers = document.getElementById('btn-layers');
+
+    function isSet(value) {
+      return value !== undefined && value !== null && value !== '';
+    }
+
+    function setupLayerRow(def) {
       const row = document.createElement('div');
       row.className = 'layer-row';
 
@@ -313,6 +400,7 @@
         } else {
           map.removeLayer(def.layer);
         }
+        if (def.onToggle) def.onToggle(checkbox.checked);
       });
 
       row.appendChild(label);
@@ -321,8 +409,141 @@
 
       if (def.visible) {
         map.addLayer(def.layer);
+        if (def.onToggle) def.onToggle(true);
       }
+    }
+
+    // Base Tile Layers
+    setupLayerRow({
+      id: 'street',
+      label: 'Street Map',
+      layer: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }),
+      visible: true
     });
+
+    setupLayerRow({
+      id: 'topo',
+      label: 'Topographic',
+      layer: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17
+      }),
+      visible: false
+    });
+
+    // Assessment Data Layers
+    const legend = document.getElementById('choropleth-legend');
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[ch]);
+    }
+
+    function vulnerabilityColor(pct) {
+      if (pct >= 14) return '#b91c1c';
+      if (pct >= 12) return '#f97316';
+      if (pct >= 10) return '#facc15';
+      if (pct >= 8) return '#a3e635';
+      return '#22c55e';
+    }
+
+    async function loadGeoData() {
+      try {
+        const [boundaryRes, landmarkRes] = await Promise.all([
+          fetch('assets/barangay_boundaries.geojson'),
+          fetch('assets/landmarks.geojson')
+        ]);
+        if (!boundaryRes.ok || !landmarkRes.ok) {
+          throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status);
+        }
+        const [boundaryData, landmarkData] = await Promise.all([
+          boundaryRes.json(),
+          landmarkRes.json()
+        ]);
+
+        const boundariesLayer = L.geoJSON(boundaryData, {
+          style: feature => {
+            const p = feature.properties;
+            const pct = Number(p.below5_pro);
+            return {
+              color: '#374151',
+              weight: 1,
+              fillColor: vulnerabilityColor(Number.isFinite(pct) ? pct : 0),
+              fillOpacity: 0.6
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const p = feature.properties;
+            const population = p.Househol_1 ? String(p.Househol_1).replace(/,/g, '') : p.Brgy_Pop;
+            const under5 = isSet(p.below5) ? p.below5 + ' (' + p.below5_pro + '%)' : null;
+            const over60 = isSet(p.above60) ? p.above60 + ' (' + p['60_pro'] + '%)' : null;
+            const rows = [
+              ['Population', population],
+              ['Households', p.Household],
+              ['Under 5', under5],
+              ['Over 60', over60]
+            ].filter(([, v]) => isSet(v));
+            layer.bindPopup(
+              '<strong>' + esc(p.REMARK || p.ADM_NM || 'Unknown') + '</strong><br>' +
+              rows.map(([k, v]) => esc(k) + ': <b>' + esc(v) + '</b>').join('<br>')
+            );
+          }
+        });
+
+        const landmarksLayer = L.geoJSON(landmarkData, {
+          pointToLayer: (feature, latlng) => {
+            const logo = feature.properties.logo;
+            if (logo) {
+              return L.marker(latlng, {
+                icon: L.divIcon({
+                  className: 'hall-marker',
+                  html: '<img src="' + esc(logo) + '" alt="">',
+                  iconSize: [34, 34],
+                  iconAnchor: [17, 17]
+                })
+              });
+            }
+            return L.circleMarker(latlng, {
+              radius: 7,
+              color: '#ffffff',
+              weight: 2,
+              fillColor: '#2563eb',
+              fillOpacity: 1
+            });
+          },
+          onEachFeature: (feature, layer) => {
+            layer.bindPopup('<strong>' + esc(feature.properties.BARANGAY) + '</strong>');
+          }
+        });
+
+        setupLayerRow({
+          id: 'boundaries',
+          label: 'Barangay Boundaries',
+          layer: boundariesLayer,
+          visible: true,
+          onToggle: show => legend.classList.toggle('show', show)
+        });
+
+        setupLayerRow({
+          id: 'landmarks',
+          label: 'Barangay Halls',
+          layer: landmarksLayer,
+          visible: true
+        });
+      } catch (err) {
+        const banner = document.getElementById('data-error');
+        banner.textContent = 'Could not load assessment data from assets/. Serve this folder over HTTP (e.g. "python -m http.server") and reload.';
+        banner.classList.add('show');
+      }
+    }
+
+    loadGeoData();
 
     // Control Event Listeners
     document.getElementById('btn-zoom-in').addEventListener('click', () => {
@@ -333,8 +554,6 @@
       map.zoomOut();
     });
 
-    const layerPanel = document.getElementById('layer-panel');
-    const btnLayers = document.getElementById('btn-layers');
     btnLayers.addEventListener('click', () => {
       const active = layerPanel.classList.toggle('active');
       btnLayers.setAttribute('aria-pressed', String(active));
