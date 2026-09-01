@@ -122,6 +122,15 @@
       object-fit: cover;
     }
 
+    .hall-marker {
+      transition: transform 0.15s ease;
+    }
+
+    .hall-marker.selected {
+      transform: scale(1.25);
+      box-shadow: 0 0 0 5px #2563eb;
+    }
+
     /* Choropleth Legend */
     .choropleth-legend {
       display: none;
@@ -432,6 +441,15 @@
       visible: false
     });
 
+    setupLayerRow({
+      id: 'topo',
+      label: 'Esri Satellite',
+      layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 17
+      }),
+      visible: false
+    });
+
     // Assessment Data Layers
     const legend = document.getElementById('choropleth-legend');
 
@@ -453,6 +471,17 @@
       return '#22c55e';
     }
 
+    function boundariesStyle(feature) {
+      const p = feature.properties;
+      const pct = Number(p.below5_pro);
+      return {
+        color: '#374151',
+        weight: 1,
+        fillColor: vulnerabilityColor(Number.isFinite(pct) ? pct : 0),
+        fillOpacity: 0.6
+      };
+    }
+
     async function loadGeoData() {
       try {
         const [boundaryRes, landmarkRes] = await Promise.all([
@@ -467,17 +496,25 @@
           landmarkRes.json()
         ]);
 
+        const BASE_MARKER_STYLE = { radius: 7, color: '#ffffff', weight: 2, fillColor: '#2563eb', fillOpacity: 1 };
+        const HIGHLIGHT_MARKER_STYLE = { radius: 10, color: '#1d4ed8', weight: 2, fillColor: '#f97316', fillOpacity: 1 };
+
+        let selectedLayer = null;
+
+        function clearSelection() {
+          if (!selectedLayer) return;
+          if (selectedLayer._type === 'boundary') {
+            selectedLayer.layer.setStyle(boundariesStyle(selectedLayer.layer.feature));
+          } else if (selectedLayer._type === 'marker') {
+            selectedLayer.layer.setStyle(BASE_MARKER_STYLE);
+          } else if (selectedLayer._type === 'logo') {
+            selectedLayer.layer._icon.classList.remove('selected');
+          }
+          selectedLayer = null;
+        }
+
         const boundariesLayer = L.geoJSON(boundaryData, {
-          style: feature => {
-            const p = feature.properties;
-            const pct = Number(p.below5_pro);
-            return {
-              color: '#374151',
-              weight: 1,
-              fillColor: vulnerabilityColor(Number.isFinite(pct) ? pct : 0),
-              fillOpacity: 0.6
-            };
-          },
+          style: boundariesStyle,
           onEachFeature: (feature, layer) => {
             const p = feature.properties;
             const population = p.Househol_1 ? String(p.Househol_1).replace(/,/g, '') : p.Brgy_Pop;
@@ -493,6 +530,15 @@
               '<strong>' + esc(p.REMARK || p.ADM_NM || 'Unknown') + '</strong><br>' +
               rows.map(([k, v]) => esc(k) + ': <b>' + esc(v) + '</b>').join('<br>')
             );
+            layer.on('click', () => {
+              clearSelection();
+              layer.setStyle({ weight: 3, color: '#1d4ed8', fillOpacity: 0.8 });
+              layer.bringToFront();
+              selectedLayer = { _type: 'boundary', layer };
+            });
+            layer.on('popupclose', () => {
+              if (selectedLayer && selectedLayer.layer === layer) clearSelection();
+            });
           }
         });
 
@@ -509,16 +555,24 @@
                 })
               });
             }
-            return L.circleMarker(latlng, {
-              radius: 7,
-              color: '#ffffff',
-              weight: 2,
-              fillColor: '#2563eb',
-              fillOpacity: 1
-            });
+            return L.circleMarker(latlng, BASE_MARKER_STYLE);
           },
           onEachFeature: (feature, layer) => {
             layer.bindPopup('<strong>' + esc(feature.properties.BARANGAY) + '</strong>');
+            const isLogo = !!(layer._icon);
+            layer.on('click', () => {
+              clearSelection();
+              if (isLogo && layer._icon) {
+                layer._icon.classList.add('selected');
+                selectedLayer = { _type: 'logo', layer };
+              } else {
+                layer.setStyle(HIGHLIGHT_MARKER_STYLE);
+                selectedLayer = { _type: 'marker', layer };
+              }
+            });
+            layer.on('popupclose', () => {
+              if (selectedLayer && selectedLayer.layer === layer) clearSelection();
+            });
           }
         });
 
