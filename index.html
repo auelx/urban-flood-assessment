@@ -234,8 +234,9 @@
       color: #333333;
     }
 
-    .layer-row + .layer-row {
-      border-top: 1px solid #e5e7eb;
+    .layer-separator {
+      height: 1px;
+      margin: 8px 8px;
     }
 
     .layer-row label {
@@ -325,6 +326,9 @@
     <div class="layer-panel" id="layer-panel">
       <h3>Layers</h3>
       <div id="layer-list"></div>
+      <div class="layer-separator"></div>
+      <h3>BaseMaps</h3>
+      <div id="basemap-list"></div>
     </div>
 
     <button class="control-btn" id="btn-layers" title="Toggle layers panel" aria-pressed="false">
@@ -377,6 +381,8 @@
 
     // Populate Layer Panel
     const layerList = document.getElementById('layer-list');
+    const basemapList = document.getElementById('basemap-list');
+    const basemapCheckboxes = [];
     const layerPanel = document.getElementById('layer-panel');
     const btnLayers = document.getElementById('btn-layers');
 
@@ -404,6 +410,16 @@
       toggle.appendChild(track);
 
       checkbox.addEventListener('change', () => {
+        if (def.target === 'basemap') {
+          if (checkbox.checked) {
+            basemapCheckboxes.forEach(other => {
+              if (other !== checkbox) {
+                other.checked = false;
+                other.dispatchEvent(new Event('change'));
+              }
+            });
+          }
+        }
         if (checkbox.checked) {
           map.addLayer(def.layer);
         } else {
@@ -414,7 +430,9 @@
 
       row.appendChild(label);
       row.appendChild(toggle);
-      layerList.appendChild(row);
+      const list = def.target === 'basemap' ? basemapList : layerList;
+      list.appendChild(row);
+      if (def.target === 'basemap') basemapCheckboxes.push(checkbox);
 
       if (def.visible) {
         map.addLayer(def.layer);
@@ -422,9 +440,10 @@
       }
     }
 
-    // Base Tile Layers
+    // Base Tile Layers (radio: only one visible at a time)
     setupLayerRow({
       id: 'street',
+      target: 'basemap',
       label: 'Street Map',
       layer: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
@@ -434,6 +453,7 @@
 
     setupLayerRow({
       id: 'topo',
+      target: 'basemap',
       label: 'Topographic',
       layer: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17
@@ -442,7 +462,8 @@
     });
 
     setupLayerRow({
-      id: 'topo',
+      id: 'satellite',
+      target: 'basemap',
       label: 'Esri Satellite',
       layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 17
