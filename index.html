@@ -484,6 +484,11 @@
       })[ch]);
     }
 
+    function typeDashArray(pct) {
+      if (['bank protection', 'legal easement'].includes(pct)) return '10, 5';
+      return 'none';
+    }
+
     function vulnerabilityColor(pct) {
       if (pct >= 14) return '#b91c1c';
       if (pct >= 12) return '#f97316';
@@ -492,29 +497,62 @@
       return '#22c55e';
     }
 
+    function typeColor(pct) {
+      if (['creek', 'depression', 'irrigation', 'lagoon', 'river', 'salvage zone', 'swamp'].includes(pct)) return '#9ccdee';
+      if (['bank protection', 'legal easement'].includes(pct)) return '#facc15';
+      return '#22c55e';
+    }
+  
+    function BarangayBoundariesStyle() {
+      return {
+        color: '#374151',
+        weight: 1,
+        dashArray: '5, 5',
+        fillColor: '#a3e635',
+        fillOpacity: 0.5
+      }
+    }
+
     function boundariesStyle(feature) {
       const p = feature.properties;
       const pct = Number(p.below5_pro);
       return {
         color: '#374151',
         weight: 1,
+        dashArray: '5, 5',
         fillColor: vulnerabilityColor(Number.isFinite(pct) ? pct : 0),
         fillOpacity: 0.6
       };
     }
 
+    function waterwaysStyle(feature) {
+      return {
+        color: '#2563eb',
+        weight: 1,
+        fillOpacity: 0.4,
+        dashArray: typeDashArray(feature.properties.desc),
+        fillColor: typeColor(feature.properties.desc)
+      };
+    }
+
     async function loadGeoData() {
       try {
-        const [boundaryRes, landmarkRes] = await Promise.all([
+        const [daetBoundaryRes, boundaryRes, landmarkRes, cadastralRes, namriaRes] = await Promise.all([
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/daet_administrative_boundary.geojson'),
           fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/barangay_boundaries.geojson'),
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/landmarks.geojson')
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/landmarks.geojson'),
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/waterways_cadastral.geojson'),
+          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/waterways_namria.geojson'),
         ]);
-        if (!boundaryRes.ok || !landmarkRes.ok) {
-          throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status);
+        if (!boundaryRes.ok || !landmarkRes.ok || !cadastralRes.ok || !namriaRes.ok) {
+          throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status + ' / ' + cadastralRes.status + ' / ' + namriaRes.status);
         }
-        const [boundaryData, landmarkData] = await Promise.all([
+        const [daetBoundaryData, boundaryData, landmarkData, cadastralData, namriaData] = await Promise.all([
+          daetBoundaryRes.json(),
           boundaryRes.json(),
-          landmarkRes.json()
+          landmarkRes.json(),
+          cadastralRes.json(),
+          namriaRes.json()
         ]);
 
         const BASE_MARKER_STYLE = { radius: 7, color: '#ffffff', weight: 2, fillColor: '#2563eb', fillOpacity: 1 };
@@ -534,8 +572,36 @@
           selectedLayer = null;
         }
 
+        function select(latLngs) {
+          selectedLayer = L.polygon(latLngs, {
+            color: '#ffffff',      // Color of the extra border
+            weight: 5,             // Make it thicker than the original border
+            opacity: 1,
+            fillColor: 'none',     // Keep the fill transparent
+            pane: 'overlayPane'    // Ensure it sits on top
+          }).addTo(map);
+        }
+
+        function selectMarker(latLngs) {
+          selectedLayer = L.circleMarker(latLngs, HIGHLIGHT_MARKER_STYLE).addTo(map);
+        }
+
+        function deselect() {
+          if (selectedLayer) {
+            map.removeLayer(selectedLayer);
+          }
+        }
+
+        const daetBoundaryLayer = L.geoJSON(daetBoundaryData, {
+          style: {
+            color: '#374151',
+            weight: 1,
+            fillOpacity: 0,
+          }
+        });
+
         const boundariesLayer = L.geoJSON(boundaryData, {
-          style: boundariesStyle,
+          style: BarangayBoundariesStyle,
           onEachFeature: (feature, layer) => {
             const p = feature.properties;
             const population = p.Househol_1 ? String(p.Househol_1).replace(/,/g, '') : p.Brgy_Pop;
@@ -551,14 +617,18 @@
               '<strong>' + esc(p.REMARK || p.ADM_NM || 'Unknown') + '</strong><br>' +
               rows.map(([k, v]) => esc(k) + ': <b>' + esc(v) + '</b>').join('<br>')
             );
+            layer.on('mouseover', (e) => {
+              const latlngs = e.target.getLatLngs();
+              select(latlngs);
+            })
+            layer.on('mouseout', () => {
+              deselect();
+            });
             layer.on('click', () => {
-              clearSelection();
-              layer.setStyle({ weight: 3, color: '#1d4ed8', fillOpacity: 0.8 });
-              layer.bringToFront();
-              selectedLayer = { _type: 'boundary', layer };
+              // TODO: Implement click behavior if needed
             });
             layer.on('popupclose', () => {
-              if (selectedLayer && selectedLayer.layer === layer) clearSelection();
+              if (selectedLayer && selectedLayer.layer === layer) deselect();
             });
           }
         });
@@ -582,19 +652,42 @@
             layer.bindPopup('<strong>' + esc(feature.properties.BARANGAY) + '</strong>');
             const isLogo = !!(layer._icon);
             layer.on('click', () => {
-              clearSelection();
-              if (isLogo && layer._icon) {
-                layer._icon.classList.add('selected');
-                selectedLayer = { _type: 'logo', layer };
-              } else {
-                layer.setStyle(HIGHLIGHT_MARKER_STYLE);
-                selectedLayer = { _type: 'marker', layer };
-              }
+              // deselect();
+              // selectMarker(layer.getLatLng());
+              // if (isLogo && layer._icon) {
+              //   layer._icon.classList.add('selected');
+              //   selectedLayer = { _type: 'logo', layer };
+              // } else {
+              //   layer.setStyle(HIGHLIGHT_MARKER_STYLE);
+              //   selectedLayer = { _type: 'marker', layer };
+              // }
             });
             layer.on('popupclose', () => {
-              if (selectedLayer && selectedLayer.layer === layer) clearSelection();
+              // if (selectedLayer && selectedLayer.layer === layer) deselect();
             });
           }
+        });
+
+        const cadastralLayer = L.geoJSON(cadastralData, {
+         style: waterwaysStyle,
+          onEachFeature: (feature, layer) => {
+            layer.bindPopup('<strong>' + esc(feature.properties.NAME || 'Waterway') + '</strong>');
+          }
+        });
+
+        const namriaLayer = L.geoJSON(namriaData, {
+         style: waterwaysStyle,
+          onEachFeature: (feature, layer) => {
+            layer.bindPopup('<strong>' + esc(feature.properties.NAME || 'Waterway') + '</strong>');
+          }
+        });
+
+        setupLayerRow({
+          id: 'daet',
+          label: 'Daet Boundaries',
+          layer: daetBoundaryLayer,
+          visible: true,
+          onToggle: show => legend.classList.toggle('show', show)
         });
 
         setupLayerRow({
@@ -611,6 +704,21 @@
           layer: landmarksLayer,
           visible: true
         });
+
+        setupLayerRow({
+          id: 'cadastral',
+          label: 'Waterways (Cadastral)',
+          layer: cadastralLayer,
+          visible: true
+        });
+
+        setupLayerRow({
+          id: 'namria',
+          label: 'Waterways (NAMRIA)',
+          layer: namriaLayer,
+          visible: true
+        });
+
       } catch (err) {
         const banner = document.getElementById('data-error');
         banner.textContent = 'Could not load assessment data from GitHub. Check your connection and reload.';
