@@ -10,7 +10,7 @@
     // Populate Layer Panel
     const layerList = document.getElementById('layer-list');
     const basemapList = document.getElementById('basemap-list');
-    const basemapCheckboxes = [];
+    const basemapInputs = [];
     const layerPanel = document.getElementById('layer-panel');
     const btnLayers = document.getElementById('btn-layers');
 
@@ -19,48 +19,61 @@
     }
 
     function setupLayerRow(def) {
-      const row = document.createElement('div');
-      row.className = 'layer-row';
+      const isBasemap = def.target === 'basemap';
+      const row = document.createElement('label');
+      row.className = 'layer-row' + (isBasemap ? ' basemap-row' : '');
 
-      const label = document.createElement('label');
-      label.textContent = def.label;
-      label.setAttribute('for', 'layer-' + def.id);
+      const name = document.createElement('span');
+      name.textContent = def.label;
 
-      const toggle = document.createElement('label');
-      toggle.className = 'switch';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = 'layer-' + def.id;
-      checkbox.checked = def.visible;
-      const track = document.createElement('span');
-      track.className = 'track';
-      toggle.appendChild(checkbox);
-      toggle.appendChild(track);
+      const input = document.createElement('input');
+      input.type = isBasemap ? 'radio' : 'checkbox';
+      if (isBasemap) input.name = 'basemap';
+      input.id = 'layer-' + def.id;
+      input.checked = def.visible;
 
-      checkbox.addEventListener('change', () => {
-        if (def.target === 'basemap') {
-          if (checkbox.checked) {
-            basemapCheckboxes.forEach(other => {
-              if (other !== checkbox) {
+      let control;
+      if (isBasemap) {
+        control = document.createElement('span');
+        control.className = 'basemap-check';
+        control.innerHTML = '<i data-lucide="check" width="20" height="20"></i>';
+        if (input.checked) control.classList.add('checked');
+        row.appendChild(input);
+      } else {
+        control = document.createElement('span');
+        control.className = 'switch';
+        const track = document.createElement('span');
+        track.className = 'track';
+        control.appendChild(input);
+        control.appendChild(track);
+      }
+
+      input.addEventListener('change', () => {
+        if (isBasemap) {
+          if (input.checked) {
+            basemapInputs.forEach(other => {
+              if (other !== input) {
                 other.checked = false;
                 other.dispatchEvent(new Event('change'));
               }
             });
           }
+          control.classList.toggle('checked', input.checked);
+          row.classList.toggle('checked', input.checked);
         }
-        if (checkbox.checked) {
+        if (input.checked) {
           map.addLayer(def.layer);
         } else {
           map.removeLayer(def.layer);
         }
-        if (def.onToggle) def.onToggle(checkbox.checked);
+        if (def.onToggle) def.onToggle(input.checked);
       });
 
-      row.appendChild(label);
-      row.appendChild(toggle);
-      const list = def.target === 'basemap' ? basemapList : layerList;
+      row.appendChild(name);
+      row.appendChild(control);
+      const list = isBasemap ? basemapList : layerList;
       list.appendChild(row);
-      if (def.target === 'basemap') basemapCheckboxes.push(checkbox);
+      if (isBasemap) basemapInputs.push(input);
 
       if (def.visible) {
         map.addLayer(def.layer);
@@ -98,6 +111,9 @@
       }),
       visible: false
     });
+
+    // Render dynamically added basemap check icons
+    lucide.createIcons();
 
     // Assessment Data Layers
 

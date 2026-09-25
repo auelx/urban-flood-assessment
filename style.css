@@ -167,15 +167,29 @@
       font-family: 'Lexend', system-ui, -apple-system, sans-serif;
       font-size: 13px;
       color: #333333;
+      cursor: pointer;
+    }
+
+    .basemap-row {
+      border-radius: 6px;
+      transition: background-color 0.15s ease;
+    }
+
+    .basemap-row:hover {
+      background: #f3f4f6;
+    }
+
+    .basemap-row.checked {
+      background: #eff6ff;
+    }
+
+    .basemap-row.checked:hover {
+      background: #dbeafe;
     }
 
     .layer-separator {
       height: 1px;
       margin: 8px 8px;
-    }
-
-    .layer-row label {
-      cursor: pointer;
     }
 
     /* Switch Toggle */
@@ -226,6 +240,38 @@
     .switch input:focus-visible + .track {
       outline: 2px solid #2563eb;
       outline-offset: 2px;
+    }
+
+    /* Basemap Check Indicator */
+    .basemap-row input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .basemap-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      color: transparent;
+      flex-shrink: 0;
+    }
+
+    .basemap-check svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .basemap-check.checked {
+      color: #2563eb;
+    }
+
+    .basemap-row input:focus-visible + .basemap-check {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      border-radius: 4px;
     }
 
     #btn-layers {
