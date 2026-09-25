@@ -1,0 +1,32 @@
+{
+"type": "FeatureCollection",
+"name": "landmarks",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "code": "001", "BARANGAY": "BARANGAY I", "adm4_code": 501603024, "a": 14.11261338, "b": 122.9567578, "image": "001" }, "geometry": { "type": "Point", "coordinates": [ 122.9567578, 14.11261338 ] } },
+{ "type": "Feature", "properties": { "id": 2, "code": "002", "BARANGAY": "BARANGAY II", "adm4_code": 501603025, "a": 14.10497149, "b": 122.9551661, "image": "002" }, "geometry": { "type": "Point", "coordinates": [ 122.9551661, 14.10497149 ] } },
+{ "type": "Feature", "properties": { "id": 3, "code": "003", "BARANGAY": "BARANGAY III", "adm4_code": 501603026, "a": 14.1129123, "b": 122.9532677, "image": "003" }, "geometry": { "type": "Point", "coordinates": [ 122.9532677, 14.1129123 ] } },
+{ "type": "Feature", "properties": { "id": 4, "code": "004", "BARANGAY": "BARANGAY IV", "adm4_code": 501603027, "a": 14.11739266, "b": 122.9488747, "image": "004" }, "geometry": { "type": "Point", "coordinates": [ 122.9488747, 14.11739266 ] } },
+{ "type": "Feature", "properties": { "id": 5, "code": "005", "BARANGAY": "BARANGAY V", "adm4_code": 501603028, "a": 14.12258345, "b": 122.9524504, "image": "005" }, "geometry": { "type": "Point", "coordinates": [ 122.9524504, 14.12258345 ] } },
+{ "type": "Feature", "properties": { "id": 6, "code": "006", "BARANGAY": "BARANGAY VI", "adm4_code": 501603029, "a": 14.11916094, "b": 122.9583571, "image": "006" }, "geometry": { "type": "Point", "coordinates": [ 122.9583571, 14.11916094 ] } },
+{ "type": "Feature", "properties": { "id": 7, "code": "007", "BARANGAY": "BARANGAY VII", "adm4_code": 501603030, "a": 14.11681863, "b": 122.9614653, "image": "007" }, "geometry": { "type": "Point", "coordinates": [ 122.9614653, 14.11681863 ] } },
+{ "type": "Feature", "properties": { "id": 8, "code": "008", "BARANGAY": "BARANGAY VIII", "adm4_code": 501603031, "a": 14.11367985, "b": 122.9580859, "image": "008" }, "geometry": { "type": "Point", "coordinates": [ 122.9580859, 14.11367985 ] } },
+{ "type": "Feature", "properties": { "id": 9, "code": "009", "BARANGAY": "ALAWIHAO", "adm4_code": 501603001, "a": 14.10917547, "b": 122.929235, "image": "009" }, "geometry": { "type": "Point", "coordinates": [ 122.929235, 14.10917547 ] } },
+{ "type": "Feature", "properties": { "id": 10, "code": "010", "BARANGAY": "AWITAN", "adm4_code": 501603002, "a": 14.13796317, "b": 122.9619731, "image": "010" }, "geometry": { "type": "Point", "coordinates": [ 122.9619731, 14.13796317 ] } },
+{ "type": "Feature", "properties": { "id": 11, "code": "011", "BARANGAY": "BAGASBAS", "adm4_code": 501603003, "a": 14.13739478, "b": 122.981962, "image": "011" }, "geometry": { "type": "Point", "coordinates": [ 122.981962, 14.13739478 ] } },
+{ "type": "Feature", "properties": { "id": 12, "code": "012", "BARANGAY": "BIBIRAO", "adm4_code": 501603004, "a": 14.09713251, "b": 122.9279957, "image": "012" }, "geometry": { "type": "Point", "coordinates": [ 122.9279957, 14.09713251 ] } },
+{ "type": "Feature", "properties": { "id": 13, "code": "013", "BARANGAY": "BORABOD", "adm4_code": 501603005, "a": 14.12882543, "b": 122.9657098, "image": "013" }, "geometry": { "type": "Point", "coordinates": [ 122.9657098, 14.12882543 ] } },
+{ "type": "Feature", "properties": { "id": 14, "code": "014", "BARANGAY": "CALASGASAN", "adm4_code": 501603006, "a": 14.08486583, "b": 122.937259, "image": "014" }, "geometry": { "type": "Point", "coordinates": [ 122.937259, 14.08486583 ] } },
+{ "type": "Feature", "properties": { "id": 15, "code": "015", "BARANGAY": "CAMAMBUGAN", "adm4_code": 501603007, "a": 14.10812817, "b": 122.9502935, "image": "015" }, "geometry": { "type": "Point", "coordinates": [ 122.9502935, 14.10812817 ] } },
+{ "type": "Feature", "properties": { "id": 16, "code": "016", "BARANGAY": "COBANGBANG", "adm4_code": 501603008, "a": 14.10409173, "b": 122.9630577, "image": "016" }, "geometry": { "type": "Point", "coordinates": [ 122.9630577, 14.10409173 ] } },
+{ "type": "Feature", "properties": { "id": 17, "code": "017", "BARANGAY": "DOGONGAN", "adm4_code": 501603012, "a": 14.1030416, "b": 122.9062226, "image": "017" }, "geometry": { "type": "Point", "coordinates": [ 122.9062226, 14.1030416 ] } },
+{ "type": "Feature", "properties": { "id": 18, "code": "018", "BARANGAY": "GAHONON", "adm4_code": 501603013, "a": 14.1228557, "b": 122.9486588, "image": "018" }, "geometry": { "type": "Point", "coordinates": [ 122.9486588, 14.1228557 ] } },
+{ "type": "Feature", "properties": { "id": 19, "code": "019", "BARANGAY": "GUBAT", "adm4_code": 501603014, "a": 14.11412709, "b": 122.9755621, "image": "019" }, "geometry": { "type": "Point", "coordinates": [ 122.9755621, 14.11412709 ] } },
+{ "type": "Feature", "properties": { "id": 20, "code": "020", "BARANGAY": "LAG-ON", "adm4_code": 501603015, "a": 14.1188871, "b": 122.9437572, "image": "020" }, "geometry": { "type": "Point", "coordinates": [ 122.9437572, 14.1188871 ] } },
+{ "type": "Feature", "properties": { "id": 21, "code": "021", "BARANGAY": "MAGANG", "adm4_code": 501603018, "a": 14.09849971, "b": 122.9527634, "image": "021" }, "geometry": { "type": "Point", "coordinates": [ 122.9527634, 14.09849971 ] } },
+{ "type": "Feature", "properties": { "id": 22, "code": "022", "BARANGAY": "MAMBALITE", "adm4_code": 501603019, "a": 14.09053145, "b": 122.9831343, "image": "022" }, "geometry": { "type": "Point", "coordinates": [ 122.9831343, 14.09053145 ] } },
+{ "type": "Feature", "properties": { "id": 23, "code": "023", "BARANGAY": "MANCRUZ", "adm4_code": 501603021, "a": 14.09654417, "b": 122.9558769, "image": "023" }, "geometry": { "type": "Point", "coordinates": [ 122.9558769, 14.09654417 ] } },
+{ "type": "Feature", "properties": { "id": 24, "code": "024", "BARANGAY": "PAMORANGON", "adm4_code": 501603023, "a": 14.09014526, "b": 122.9590571, "image": "024" }, "geometry": { "type": "Point", "coordinates": [ 122.9590571, 14.09014526 ] } },
+{ "type": "Feature", "properties": { "id": 25, "code": "025", "BARANGAY": "SAN ISIDRO", "adm4_code": 501603032, "a": 14.10914316, "b": 122.9727535, "image": "025" }, "geometry": { "type": "Point", "coordinates": [ 122.9727535, 14.10914316 ] } }
+]
+}
