@@ -1,23 +1,304 @@
 {
-    "001": "assets/images/logos/brgy%20i.png",
-    "002": "assets/images/logos/brgy%20ii.png",
-    "003": "assets/images/logos/brgy%20iii.png",
-    "004": "assets/images/logos/brgy%20iv.png",
-    "006": "assets/images/logos/brgy%20vi.png",
-    "007": "assets/images/logos/brgy%20vii.png",
-    "008": "assets/images/logos/brgy%20viii.png",
-    "009": "assets/images/logos/alawihao.png",
-    "010": "assets/images/logos/awitan.png",
-    "012": "assets/images/logos/bibirao.png",
-    "013": "assets/images/logos/borabod.png",
-    "014": "assets/images/logos/calasgasan.png",
-    "017": "assets/images/logos/dogongan.png",
-    "018": "assets/images/logos/gahonon.png",
-    "019": "assets/images/logos/gubat.png",
-    "020": "assets/images/logos/lag-on.png",
-    "021": "assets/images/logos/brgy%20magang.png",
-    "022": "assets/images/logos/mambalite.png",
-    "023": "assets/images/logos/brgy%20mancruz.png",
-    "024": "assets/images/logos/pamorangon.png",
-    "025": "assets/images/logos/san%20isidro.png"
+  "barangay": [
+    {
+      "code": "001",
+      "name": "Barangay I",
+      "logo": "assets/images/logos/brgy%20i.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "002",
+      "name": "Barangay II",
+      "logo": "assets/images/logos/brgy%20ii.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "003",
+      "name": "Barangay III",
+      "logo": "assets/images/logos/brgy%20iii.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "004",
+      "name": "Barangay IV",
+      "logo": "assets/images/logos/brgy%20iv.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "005",
+      "name": "Barangay V",
+      "logo": "",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "006",
+      "name": "Barangay VI",
+      "logo": "assets/images/logos/brgy%20vi.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "007",
+      "name": "Barangay VII",
+      "logo": "assets/images/logos/brgy%20vii.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "008",
+      "name": "Barangay VIII",
+      "logo": "assets/images/logos/brgy%20viii.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "009",
+      "name": "Alawihao",
+      "logo": "assets/images/logos/alawihao.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "010",
+      "name": "Awitan",
+      "logo": "assets/images/logos/awitan.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "011",
+      "name": "Bagasbas",
+      "logo": "",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "012",
+      "name": "Bibiirao",
+      "logo": "assets/images/logos/bibirao.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "013",
+      "name": "Borabod",
+      "logo": "assets/images/logos/borabod.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "014",
+      "name": "Calasgasan",
+      "logo": "assets/images/logos/calasgasan.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "015",
+      "name": "Camambugan",
+      "logo": "",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+     {
+      "code": "016",
+      "name": "Cobangbang",
+      "logo": "",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "017",
+      "name": "Dogongan",
+      "logo": "assets/images/logos/dogongan.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "018",
+      "name": "Gahonon",
+      "logo": "assets/images/logos/gahonon.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "019",
+      "name": "Gubat",
+      "logo": "assets/images/logos/gubat.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "020",
+      "name": "Lag-on",
+      "logo": "assets/images/logos/lag-on.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "021",
+      "name": "Barangay Magang",
+      "logo": "assets/images/logos/brgy%20magang.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "022",
+      "name": "Mambalite",
+      "logo": "assets/images/logos/mambalite.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "023",
+      "name": "Barangay Mancruz",
+      "logo": "assets/images/logos/brgy%20mancruz.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "024",
+      "name": "Pamorangon",
+      "logo": "assets/images/logos/pamorangon.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
+      "code": "025",
+      "name": "San Isidro",
+      "logo": "assets/images/logos/san%20isidro.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    }
+  ]
 }
