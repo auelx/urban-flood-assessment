@@ -51,7 +51,7 @@
     {
       "code": "005",
       "name": "Barangay V",
-      "logo": "",
+      "logo": "assets/images/logos/brgy%20v.png",
       "activities": [
         {
           "code": "fgd",
@@ -116,14 +116,22 @@
         {
           "code": "fgd",
           "name": "Focus Group Discussion",
-          "image": []
+          "image": [
+            "/images/fgd/awitan/IMG_3980.jpg",
+            "/images/fgd/awitan/IMG_3982.jpg",
+            "/images/fgd/awitan/IMG_3987.jpg",
+            "/images/fgd/awitan/IMG_3988.jpg",
+            "/images/fgd/awitan/IMG_3989.jpg",
+            "/images/fgd/awitan/IMG_3995.jpg",
+            "/images/fgd/awitan/IMG_4018.jpg"
+          ]
         }
       ]
     },
     {
       "code": "011",
       "name": "Bagasbas",
-      "logo": "",
+      "logo": "assets/images/logos/bagasbas.png",
       "activities": [
         {
           "code": "fgd",
@@ -134,7 +142,7 @@
     },
     {
       "code": "012",
-      "name": "Bibiirao",
+      "name": "Bibirao",
       "logo": "assets/images/logos/bibirao.png",
       "activities": [
         {
@@ -183,7 +191,7 @@
      {
       "code": "016",
       "name": "Cobangbang",
-      "logo": "",
+      "logo": "assets/images/logos/cobangbang.png",
       "activities": [
         {
           "code": "fgd",
@@ -242,7 +250,7 @@
     },
     {
       "code": "021",
-      "name": "Barangay Magang",
+      "name": "Magang",
       "logo": "assets/images/logos/brgy%20magang.png",
       "activities": [
         {
@@ -266,7 +274,7 @@
     },
     {
       "code": "023",
-      "name": "Barangay Mancruz",
+      "name": "Mancruz",
       "logo": "assets/images/logos/brgy%20mancruz.png",
       "activities": [
         {
