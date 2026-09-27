@@ -112,6 +112,16 @@
       visible: false
     });
 
+    setupLayerRow({
+      id: 'google-satellite',
+      target: 'basemap',
+      label: 'Google Satellite',
+      layer: L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20
+      }),
+      visible: false
+    });
+
     // Render dynamically added basemap check icons
     lucide.createIcons();
 
@@ -158,15 +168,32 @@
       };
     }
 
+    let barangayByCode = {};
+    let nameToCode = {};
+
+    function normalizeName(s) {
+      return String(s || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+    }
+
     async function loadGeoData() {
       try {
+        const ASSETS_URL = 'https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/';
         const [daetBoundaryRes, boundaryRes, landmarkRes, cadastralRes, namriaRes] = await Promise.all([
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/daet_administrative_boundary.geojson'),
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/barangay_boundaries.geojson'),
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/landmarks.geojson'),
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/waterways_cadastral.geojson'),
-          fetch('https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/waterways_namria.geojson'),
+          fetch(ASSETS_URL + 'geojson/daet_administrative_boundary.geojson'),
+          fetch(ASSETS_URL + 'geojson/barangay_boundaries.geojson'),
+          fetch(ASSETS_URL + 'geojson/landmarks.geojson'),
+          fetch(ASSETS_URL + 'geojson/waterways_cadastral.geojson'),
+          fetch(ASSETS_URL + 'geojson/waterways_namria.geojson'),
         ]);
+        fetch(ASSETS_URL + 'images/images.json')
+          .then(r => r.status !== 200 ? { barangay: [] } : r.json())
+          .then(data => {
+            (data && data.barangay || []).forEach(b => {
+              barangayByCode[b.code] = b;
+              if (b.name) nameToCode[normalizeName(b.name)] = b.code;
+            });
+          })
+          .catch(() => {});
         if (!boundaryRes.ok || !landmarkRes.ok || !cadastralRes.ok || !namriaRes.ok) {
           throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status + ' / ' + cadastralRes.status + ' / ' + namriaRes.status);
         }
@@ -178,7 +205,12 @@
           namriaRes.json()
         ]);
 
-        const BASE_MARKER_STYLE = { radius: 7, color: '#ffffff', weight: 2, fillColor: '#2563eb', fillOpacity: 1 };
+        landmarkData.features.forEach(f => {
+          const nm = f.properties.BARANGAY;
+          if (nm) nameToCode[normalizeName(nm)] = f.properties.image || f.properties.code;
+        });
+
+        const BASE_MARKER_STYLE = { radius: 7, color: '#ffffff', weight: 2, fillColor: '#2563eb', fillOpacity: 1, bubblingMouseEvents: false };
         const HIGHLIGHT_MARKER_STYLE = { radius: 10, color: '#1d4ed8', weight: 2, fillColor: '#f97316', fillOpacity: 1, interactive: false };
         const HIGHLIGHT_POLYGON_STYLE = {
             color: '#ffffff',      // Color of the extra border
@@ -207,7 +239,130 @@
           }
         }
 
+        function assetUrl(path) {
+          if (!path) return null;
+          return /^https?:\/\//i.test(path) ? path : ASSETS_URL + path.replace(/^assets\//, '');
+        }
+
+        function getBarangayByCode(code) {
+          return code ? barangayByCode[code] : null;
+        }
+
+        function getBarangayByName(name) {
+          const code = name ? nameToCode[normalizeName(name)] : null;
+          return code ? barangayByCode[code] : null;
+        }
+
+        function showFeatureInfo({ title, rows, barangay }) {
+          const record = barangay || null;
+          const panel = document.getElementById('info-panel');
+          document.getElementById('info-title').textContent = (record ? record.name : title).toUpperCase();
+
+          const logoEl = document.getElementById('info-logo');
+          logoEl.classList.remove('info-panel__logo--empty');
+          const logoUrl = assetUrl(record && record.logo ? record.logo : '');
+          if (logoUrl) {
+            const logoImg = document.createElement('img');
+            logoImg.src = logoUrl;
+            logoImg.alt = record.name;
+            logoEl.innerHTML = '';
+            logoEl.appendChild(logoImg);
+          } else {
+            logoEl.innerHTML = '<i data-lucide="building-2" width="26" height="26"></i>';
+            logoEl.classList.add('info-panel__logo--empty');
+            lucide.createIcons();
+          }
+
+          const content = document.getElementById('info-content');
+          content.innerHTML = '';
+          if (record) {
+            const mapWrap = document.createElement('div');
+            mapWrap.className = 'info-panel__map';
+            const mapUrl = assetUrl(record.map);
+            const showMapPlaceholder = () => {
+              mapWrap.classList.add('info-panel__map--empty');
+              mapWrap.innerHTML = '<i data-lucide="map" width="24" height="24"></i><span>Map not available</span>';
+              lucide.createIcons();
+            };
+            if (mapUrl) {
+              const img = document.createElement('img');
+              img.className = 'info-panel__map-img';
+              img.src = mapUrl;
+              img.alt = 'Map of ' + record.name;
+              img.addEventListener('error', showMapPlaceholder);
+              img.addEventListener('click', () => openImageModal(mapUrl));
+              mapWrap.appendChild(img);
+            } else {
+              showMapPlaceholder();
+            }
+            content.appendChild(mapWrap);
+          }
+          rows.forEach(([k, v]) => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'info-panel__row';
+            const keyEl = document.createElement('span');
+            keyEl.className = 'info-panel__key';
+            keyEl.textContent = k;
+            const valEl = document.createElement('span');
+            valEl.className = 'info-panel__val';
+            valEl.textContent = v;
+            rowEl.appendChild(keyEl);
+            rowEl.appendChild(valEl);
+            content.appendChild(rowEl);
+          });
+
+          if (record && record.activities && record.activities.length) {
+            const section = document.createElement('div');
+            section.className = 'info-panel__section';
+            const heading = document.createElement('div');
+            heading.className = 'info-panel__section-heading';
+            heading.textContent = 'Activities';
+            section.appendChild(heading);
+            record.activities.forEach(act => {
+              const row = document.createElement('div');
+              row.className = 'info-panel__activity';
+              row.textContent = act.name;
+              section.appendChild(row);
+              if (act.image && act.image.length) {
+                const thumbs = document.createElement('div');
+                thumbs.className = 'info-panel__thumbs';
+                const urls = act.image.map(assetUrl).filter(Boolean);
+                const visible = urls.slice(0, MAX_ACTIVITY_THUMBS);
+                visible.forEach((url, i) => {
+                  const img = document.createElement('img');
+                  img.className = 'info-panel__thumb';
+                  img.src = url;
+                  img.alt = act.name;
+                  img.addEventListener('click', () => openImageModal(urls, i));
+                  thumbs.appendChild(img);
+                });
+                if (urls.length > visible.length) {
+                  const more = document.createElement('div');
+                  more.className = 'info-panel__thumb info-panel__more';
+                  more.textContent = '+' + (urls.length - visible.length);
+                  more.title = 'Show all images';
+                  more.addEventListener('click', () => openImageModal(urls, visible.length));
+                  thumbs.appendChild(more);
+                }
+                section.appendChild(thumbs);
+              }
+            });
+            content.appendChild(section);
+          }
+
+          panel.classList.add('show');
+        }
+
+        function closeFeatureInfo() {
+          document.getElementById('info-panel').classList.remove('show');
+          deselect();
+        }
+
+        document.getElementById('info-close').addEventListener('click', closeFeatureInfo);
+        map.on('click', closeFeatureInfo);
+
         const daetBoundaryLayer = L.geoJSON(daetBoundaryData, {
+          bubblingMouseEvents: false,
           style: {
             color: '#374151',
             weight: 1,
@@ -216,6 +371,7 @@
         });
 
         const boundariesLayer = L.geoJSON(boundaryData, {
+          bubblingMouseEvents: false,
           style: barangayBoundariesStyle,
           onEachFeature: (feature, layer) => {
             const p = feature.properties;
@@ -228,10 +384,14 @@
               ['Under 5', under5],
               ['Over 60', over60]
             ].filter(([, v]) => isSet(v));
-            layer.bindPopup(
-              '<strong>' + esc(p.REMARK || p.ADM_NM || 'Unknown') + '</strong><br>' +
-              rows.map(([k, v]) => esc(k) + ': <b>' + esc(v) + '</b>').join('<br>')
-            );
+            layer.on('click', () => {
+              select(layer.getLatLngs());
+              showFeatureInfo({
+                title: p.REMARK || p.ADM_NM || 'Unknown',
+                rows,
+                barangay: getBarangayByName(p.REMARK || p.ADM_NM)
+              });
+            });
             layer.on('mouseover', (e) => {
               const latlngs = e.target.getLatLngs();
               
@@ -240,50 +400,52 @@
             layer.on('mouseout', () => {
               deselect();
             });
-            layer.on('popupclose', () => {
-              deselect();
-            });
           }
         });
 
         const landmarksLayer = L.geoJSON(landmarkData, {
+          bubblingMouseEvents: false,
           pointToLayer: (feature, latlng) => {
-            const logo = feature.properties.logo;
-            if (logo) {
-              return L.marker(latlng, {
-                icon: L.divIcon({
-                  className: 'hall-marker',
-                  html: '<img src="' + esc(logo) + '" alt="">',
-                  iconSize: [34, 34],
-                  iconAnchor: [17, 17]
-                })
-              });
-            }
             return L.circleMarker(latlng, BASE_MARKER_STYLE);
           },
           onEachFeature: (feature, layer) => {
-            layer.bindPopup('<strong>' + esc(feature.properties.BARANGAY) + '</strong>');
             layer.on('click', () => {
               deselect();
               selectMarker(layer.getLatLng());
-            });
-            layer.on('popupclose', () => {
-              deselect();
+              showFeatureInfo({
+                title: feature.properties.BARANGAY || 'Unknown',
+                rows: [['Code', feature.properties.code]],
+                barangay: getBarangayByCode(feature.properties.image || feature.properties.code)
+              });
             });
           }
         });
 
         const cadastralLayer = L.geoJSON(cadastralData, {
+         bubblingMouseEvents: false,
          style: waterwaysStyle,
           onEachFeature: (feature, layer) => {
-            layer.bindPopup('<strong>' + esc(feature.properties.NAME || 'Waterway') + '</strong>');
+            layer.on('click', () => {
+              showFeatureInfo({
+                title: feature.properties.NAME || 'Waterway',
+                rows: [['Type', feature.properties.desc]],
+                barangay: null
+              });
+            });
           }
         });
 
         const namriaLayer = L.geoJSON(namriaData, {
+         bubblingMouseEvents: false,
          style: waterwaysStyle,
           onEachFeature: (feature, layer) => {
-            layer.bindPopup('<strong>' + esc(feature.properties.NAME || 'Waterway') + '</strong>');
+            layer.on('click', () => {
+              showFeatureInfo({
+                title: feature.properties.NAME || 'Waterway',
+                rows: [['Type', feature.properties.desc]],
+                barangay: null
+              });
+            });
           }
         });
 
@@ -312,14 +474,14 @@
           id: 'cadastral',
           label: 'Waterways (Cadastral)',
           layer: cadastralLayer,
-          visible: true
+          visible: false
         });
 
         setupLayerRow({
           id: 'namria',
           label: 'Waterways (NAMRIA)',
           layer: namriaLayer,
-          visible: true
+          visible: false
         });
 
       } catch (err) {
@@ -343,4 +505,67 @@
     btnLayers.addEventListener('click', () => {
       const active = layerPanel.classList.toggle('active');
       btnLayers.setAttribute('aria-pressed', String(active));
+    });
+
+    // Image Preview Modal
+    let modalImages = [];
+    let modalIndex = 0;
+    const MAX_ACTIVITY_THUMBS = 3;
+
+    function openImageModal(sources, index) {
+      const list = Array.isArray(sources) && sources.length ? sources : [sources];
+      modalImages = list;
+      modalIndex = Math.min(Math.max(index || 0, 0), list.length - 1);
+      renderModalImage();
+      document.getElementById('image-modal').classList.add('show');
+    }
+
+    function renderModalImage() {
+      document.getElementById('image-modal-img').src = modalImages[modalIndex];
+      const single = modalImages.length <= 1;
+      const prevBtn = document.getElementById('image-modal-prev');
+      const nextBtn = document.getElementById('image-modal-next');
+      prevBtn.style.display = single ? 'none' : '';
+      nextBtn.style.display = single ? 'none' : '';
+      prevBtn.disabled = modalIndex <= 0;
+      nextBtn.disabled = modalIndex >= modalImages.length - 1;
+    }
+
+    function prevImage() {
+      if (modalIndex > 0) {
+        modalIndex--;
+        renderModalImage();
+      }
+    }
+
+    function nextImage() {
+      if (modalIndex < modalImages.length - 1) {
+        modalIndex++;
+        renderModalImage();
+      }
+    }
+
+    function closeImageModal() {
+      document.getElementById('image-modal').classList.remove('show');
+      document.getElementById('image-modal-img').src = '';
+      modalImages = [];
+      modalIndex = 0;
+    }
+
+    document.getElementById('image-modal-close').addEventListener('click', closeImageModal);
+    document.getElementById('image-modal-prev').addEventListener('click', prevImage);
+    document.getElementById('image-modal-next').addEventListener('click', nextImage);
+    document.getElementById('image-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('image-modal')) {
+        closeImageModal();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      }
     });

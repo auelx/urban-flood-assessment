@@ -54,6 +54,30 @@
 
   </div>
 
+  <div class="info-panel" id="info-panel">
+    <div class="info-panel__header">
+      <span class="info-panel__logo" id="info-logo"></span>
+      <h4 class="info-panel__title" id="info-title"></h4>
+      <button class="info-panel__close" id="info-close" title="Close" aria-label="Close">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <div class="info-panel__content" id="info-content"></div>
+  </div>
+
+  <div class="image-modal" id="image-modal">
+    <button class="image-modal__close" id="image-modal-close" title="Close" aria-label="Close">
+      <i data-lucide="x" width="24" height="24"></i>
+    </button>
+    <button class="image-modal__nav image-modal__nav--prev" id="image-modal-prev" title="Previous" aria-label="Previous">
+      <i data-lucide="chevron-left" width="28" height="28"></i>
+    </button>
+    <img id="image-modal-img" alt="">
+    <button class="image-modal__nav image-modal__nav--next" id="image-modal-next" title="Next" aria-label="Next">
+      <i data-lucide="chevron-right" width="28" height="28"></i>
+    </button>
+  </div>
+
   <div class="data-error" id="data-error"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
