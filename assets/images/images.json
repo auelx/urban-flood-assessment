@@ -4,6 +4,7 @@
       "code": "001",
       "name": "Barangay I",
       "logo": "assets/images/logos/brgy%20i.png",
+      "map": "assets/images/maps/brgy%20i.png",
       "activities": [
         {
           "code": "fgd",
@@ -16,6 +17,7 @@
       "code": "002",
       "name": "Barangay II",
       "logo": "assets/images/logos/brgy%20ii.png",
+      "map": "assets/images/maps/brgy%20ii.png",
       "activities": [
         {
           "code": "fgd",
@@ -28,6 +30,7 @@
       "code": "003",
       "name": "Barangay III",
       "logo": "assets/images/logos/brgy%20iii.png",
+      "map": "assets/images/maps/brgy%20iii.png",
       "activities": [
         {
           "code": "fgd",
@@ -40,6 +43,7 @@
       "code": "004",
       "name": "Barangay IV",
       "logo": "assets/images/logos/brgy%20iv.png",
+      "map": "assets/images/maps/brgy%20iv.png",
       "activities": [
         {
           "code": "fgd",
@@ -52,6 +56,7 @@
       "code": "005",
       "name": "Barangay V",
       "logo": "assets/images/logos/brgy%20v.png",
+      "map": "assets/images/maps/brgy%20v.png",
       "activities": [
         {
           "code": "fgd",
@@ -64,6 +69,7 @@
       "code": "006",
       "name": "Barangay VI",
       "logo": "assets/images/logos/brgy%20vi.png",
+      "map": "assets/images/maps/brgy%20vi.png",
       "activities": [
         {
           "code": "fgd",
@@ -76,6 +82,7 @@
       "code": "007",
       "name": "Barangay VII",
       "logo": "assets/images/logos/brgy%20vii.png",
+      "map": "assets/images/maps/brgy%20vii.png",
       "activities": [
         {
           "code": "fgd",
@@ -88,6 +95,7 @@
       "code": "008",
       "name": "Barangay VIII",
       "logo": "assets/images/logos/brgy%20viii.png",
+      "map": "assets/images/maps/brgy%20viii.png",
       "activities": [
         {
           "code": "fgd",
@@ -98,20 +106,9 @@
     },
     {
       "code": "009",
-      "name": "Alawihao",
+      "name": "Barangay Alawihao",
       "logo": "assets/images/logos/alawihao.png",
-      "activities": [
-        {
-          "code": "fgd",
-          "name": "Focus Group Discussion",
-          "image": []
-        }
-      ]
-    },
-    {
-      "code": "010",
-      "name": "Awitan",
-      "logo": "assets/images/logos/awitan.png",
+      "map": "assets/images/maps/brgy%20alawihao.png",
       "activities": [
         {
           "code": "fgd",
@@ -129,9 +126,23 @@
       ]
     },
     {
+      "code": "010",
+      "name": "Barangay Awitan",
+      "logo": "assets/images/logos/awitan.png",
+      "map": "assets/images/maps/brgy%20awitan.png",
+      "activities": [
+        {
+          "code": "fgd",
+          "name": "Focus Group Discussion",
+          "image": []
+        }
+      ]
+    },
+    {
       "code": "011",
-      "name": "Bagasbas",
+      "name": "Barangay Bagasbas",
       "logo": "assets/images/logos/bagasbas.png",
+      "map": "assets/images/maps/brgy%20bagasbas.png",
       "activities": [
         {
           "code": "fgd",
@@ -142,8 +153,9 @@
     },
     {
       "code": "012",
-      "name": "Bibirao",
+      "name": "Barangay Bibirao",
       "logo": "assets/images/logos/bibirao.png",
+        "map": "assets/images/maps/brgy%20bibirao.png",
       "activities": [
         {
           "code": "fgd",
@@ -154,8 +166,9 @@
     },
     {
       "code": "013",
-      "name": "Borabod",
+      "name": "Barangay Borabod",
       "logo": "assets/images/logos/borabod.png",
+      "map": "assets/images/maps/brgy%20borabod.png",
       "activities": [
         {
           "code": "fgd",
@@ -166,8 +179,9 @@
     },
     {
       "code": "014",
-      "name": "Calasgasan",
+      "name": "Barangay Calasgasan",
       "logo": "assets/images/logos/calasgasan.png",
+      "map": "assets/images/maps/brgy%20calasgasan.png",
       "activities": [
         {
           "code": "fgd",
@@ -178,8 +192,9 @@
     },
     {
       "code": "015",
-      "name": "Camambugan",
+      "name": "Barangay Camambugan",
       "logo": "",
+      "map": "assets/images/maps/brgy%20camambugan.png",
       "activities": [
         {
           "code": "fgd",
@@ -190,8 +205,9 @@
     },
      {
       "code": "016",
-      "name": "Cobangbang",
+      "name": "Barangay Cobangbang",
       "logo": "assets/images/logos/cobangbang.png",
+      "map": "assets/images/maps/brgy%20cobangbang.png",
       "activities": [
         {
           "code": "fgd",
@@ -202,8 +218,9 @@
     },
     {
       "code": "017",
-      "name": "Dogongan",
+      "name": "Barangay Dogongan",
       "logo": "assets/images/logos/dogongan.png",
+      "map": "assets/images/maps/brgy%20dogongan.png",
       "activities": [
         {
           "code": "fgd",
@@ -214,8 +231,9 @@
     },
     {
       "code": "018",
-      "name": "Gahonon",
+      "name": "Barangay Gahonon",
       "logo": "assets/images/logos/gahonon.png",
+      "map": "assets/images/maps/brgy%20gahonon.png",
       "activities": [
         {
           "code": "fgd",
@@ -226,8 +244,9 @@
     },
     {
       "code": "019",
-      "name": "Gubat",
+      "name": "Barangay Gubat",
       "logo": "assets/images/logos/gubat.png",
+      "map": "assets/images/maps/brgy%20gubat.png",
       "activities": [
         {
           "code": "fgd",
@@ -238,8 +257,9 @@
     },
     {
       "code": "020",
-      "name": "Lag-on",
+      "name": "Barangay Lag-on",
       "logo": "assets/images/logos/lag-on.png",
+      "map": "assets/images/maps/brgy%20lag-on.png",
       "activities": [
         {
           "code": "fgd",
@@ -250,8 +270,9 @@
     },
     {
       "code": "021",
-      "name": "Magang",
+      "name": "Barangay Magang",
       "logo": "assets/images/logos/brgy%20magang.png",
+      "map": "assets/images/maps/brgy%20magang.png",
       "activities": [
         {
           "code": "fgd",
@@ -262,8 +283,9 @@
     },
     {
       "code": "022",
-      "name": "Mambalite",
+      "name": "Barangay Mambalite",
       "logo": "assets/images/logos/mambalite.png",
+      "map": "assets/images/maps/brgy%20mambalite.png",
       "activities": [
         {
           "code": "fgd",
@@ -274,8 +296,9 @@
     },
     {
       "code": "023",
-      "name": "Mancruz",
+      "name": "Barangay Mancruz",
       "logo": "assets/images/logos/brgy%20mancruz.png",
+      "map": "assets/images/maps/brgy%20mancruz.png",
       "activities": [
         {
           "code": "fgd",
@@ -286,8 +309,9 @@
     },
     {
       "code": "024",
-      "name": "Pamorangon",
+      "name": "Barangay Pamorangon",
       "logo": "assets/images/logos/pamorangon.png",
+      "map": "assets/images/maps/brgy%20pamorangon.png",
       "activities": [
         {
           "code": "fgd",
@@ -298,8 +322,9 @@
     },
     {
       "code": "025",
-      "name": "San Isidro",
+      "name": "Barangay San Isidro",
       "logo": "assets/images/logos/san%20isidro.png",
+      "map": "assets/images/maps/brgy%20san%20isidro.png",
       "activities": [
         {
           "code": "fgd",
