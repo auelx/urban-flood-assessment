@@ -1,8 +1,9 @@
     // Initialize map with default controls disabled
     const map = L.map('map', {
       zoomControl: false,
-      attributionControl: false
-    }).setView([14.1122, 122.9553], 13);
+      attributionControl: false,
+      minZoom: 13,
+    }).setView([14.1122, 122.9553], 14);
 
     // Initialize Lucide Icons
     lucide.createIcons();
@@ -177,7 +178,7 @@
 
     async function loadGeoData() {
       try {
-        const ASSETS_URL = 'https://raw.githubusercontent.com/auelx/urban-flood-assessment/main/assets/';
+        const ASSETS_URL = './assets/';
         const [daetBoundaryRes, boundaryRes, landmarkRes, cadastralRes, namriaRes] = await Promise.all([
           fetch(ASSETS_URL + 'geojson/daet_administrative_boundary.geojson'),
           fetch(ASSETS_URL + 'geojson/barangay_boundaries.geojson'),
@@ -365,7 +366,7 @@
           bubblingMouseEvents: false,
           style: {
             color: '#374151',
-            weight: 1,
+            weight: 2,
             fillOpacity: 0,
           }
         });
@@ -376,13 +377,9 @@
           onEachFeature: (feature, layer) => {
             const p = feature.properties;
             const population = p.Househol_1 ? String(p.Househol_1).replace(/,/g, '') : p.Brgy_Pop;
-            const under5 = isSet(p.below5) ? p.below5 + ' (' + p.below5_pro + '%)' : null;
-            const over60 = isSet(p.above60) ? p.above60 + ' (' + p['60_pro'] + '%)' : null;
             const rows = [
               ['Population', population],
               ['Households', p.Household],
-              ['Under 5', under5],
-              ['Over 60', over60]
             ].filter(([, v]) => isSet(v));
             layer.on('click', () => {
               select(layer.getLatLngs());
@@ -414,7 +411,7 @@
               selectMarker(layer.getLatLng());
               showFeatureInfo({
                 title: feature.properties.BARANGAY || 'Unknown',
-                rows: [['Code', feature.properties.code]],
+                rows: [],
                 barangay: getBarangayByCode(feature.properties.image || feature.properties.code)
               });
             });
