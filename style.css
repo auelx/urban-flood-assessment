@@ -426,6 +426,55 @@
       padding: 4px 8px 8px;
     }
 
+    .legend-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: none;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 8px;
+      min-width: 170px;
+    }
+
+    .legend-panel.visible {
+      display: block;
+    }
+
+    .legend-group {
+      padding: 0 8px 8px;
+    }
+
+    .legend-panel h4 {
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      padding: 2px 0 4px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #374151;
+      line-height: 1.9;
+      text-transform: capitalize;
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
     .layer-row {
       display: flex;
       align-items: center;

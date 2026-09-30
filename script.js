@@ -154,8 +154,8 @@
         color: '#374151',
         weight: 1,
         dashArray: '5, 5',
-        fillColor: '#a3e635',
-        fillOpacity: 0.5
+        fillColor: '#ffffff',
+        fillOpacity: 0.3
       }
     }
 
@@ -169,6 +169,54 @@
       };
     }
 
+    const COLOR_BY_FLOOD_COL = {
+      'flood-prone': '#dc2626',
+      'issues': '#f59e0b',
+      'etc': '#6366f1'
+    };
+
+    const COLOR_BY_WATERWAY_DESC = {
+      'creek': '#0891b2',
+      'old creek': '#67e8f9',
+      'drainage': '#2563eb',
+      'canal': '#0d9488',
+      'river': '#1d4ed8',
+      'labog': '#7c3aed',
+      'dead creek': '#6b7280',
+      'closed canal': '#6b7280',
+      'creek/drainage': '#0e7490',
+      'seasonal \'pond\'': '#f97316',
+      'seasonal canal': '#f97316'
+    };
+
+    const DASHED_WATERWAY_DESCS = ['dead creek', 'closed canal', 'creek/drainage', 'seasonal \'pond\'', 'seasonal canal'];
+
+    function floodProneStyle(feature) {
+      const col = feature.properties.col;
+      return {
+        color: COLOR_BY_FLOOD_COL[col] || '#6b7280',
+        weight: 1 ,
+        fillColor: COLOR_BY_FLOOD_COL[col] || '#6b7280',
+        fillOpacity: .5
+      };
+    }
+
+    function waterwaysFgdStyle(feature) {
+      const desc = feature.properties.desc;
+      return {
+        color: COLOR_BY_WATERWAY_DESC[desc] || '#2563eb',
+        weight: 2,
+        fillColor: COLOR_BY_WATERWAY_DESC[desc] || '#2563eb',
+        fillOpacity: 1,
+        dashArray: DASHED_WATERWAY_DESCS.includes(desc) ? '6, 4' : 'none'
+      };
+    }
+
+    function hasCoordinates(feature) {
+      const coords = feature && feature.geometry && feature.geometry.coordinates;
+      return Array.isArray(coords) && coords.length > 0;
+    }
+
     let barangayByCode = {};
     let nameToCode = {};
 
@@ -179,12 +227,14 @@
     async function loadGeoData() {
       try {
         const ASSETS_URL = './assets/';
-        const [daetBoundaryRes, boundaryRes, landmarkRes, cadastralRes, namriaRes] = await Promise.all([
+        const [daetBoundaryRes, boundaryRes, landmarkRes, cadastralRes, namriaRes, floodProneRes, waterwaysFgdRes] = await Promise.all([
           fetch(ASSETS_URL + 'geojson/daet_administrative_boundary.geojson'),
           fetch(ASSETS_URL + 'geojson/barangay_boundaries.geojson'),
           fetch(ASSETS_URL + 'geojson/landmarks.geojson'),
           fetch(ASSETS_URL + 'geojson/waterways_cadastral.geojson'),
           fetch(ASSETS_URL + 'geojson/waterways_namria.geojson'),
+          fetch(ASSETS_URL + 'geojson/floodprone_fgd.geojson'),
+          fetch(ASSETS_URL + 'geojson/waterways_fgd.geojson'),
         ]);
         fetch(ASSETS_URL + 'images/images.json')
           .then(r => r.status !== 200 ? { barangay: [] } : r.json())
@@ -195,15 +245,17 @@
             });
           })
           .catch(() => {});
-        if (!boundaryRes.ok || !landmarkRes.ok || !cadastralRes.ok || !namriaRes.ok) {
-          throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status + ' / ' + cadastralRes.status + ' / ' + namriaRes.status);
+        if (!boundaryRes.ok || !landmarkRes.ok || !cadastralRes.ok || !namriaRes.ok || !floodProneRes.ok || !waterwaysFgdRes.ok) {
+          throw new Error('HTTP ' + boundaryRes.status + ' / ' + landmarkRes.status + ' / ' + cadastralRes.status + ' / ' + namriaRes.status + ' / ' + floodProneRes.status + ' / ' + waterwaysFgdRes.status);
         }
-        const [daetBoundaryData, boundaryData, landmarkData, cadastralData, namriaData] = await Promise.all([
+        const [daetBoundaryData, boundaryData, landmarkData, cadastralData, namriaData, floodProneData, waterwaysFgdData] = await Promise.all([
           daetBoundaryRes.json(),
           boundaryRes.json(),
           landmarkRes.json(),
           cadastralRes.json(),
-          namriaRes.json()
+          namriaRes.json(),
+          floodProneRes.json(),
+          waterwaysFgdRes.json()
         ]);
 
         landmarkData.features.forEach(f => {
@@ -214,7 +266,7 @@
         const BASE_MARKER_STYLE = { radius: 7, color: '#ffffff', weight: 2, fillColor: '#2563eb', fillOpacity: 1, bubblingMouseEvents: false };
         const HIGHLIGHT_MARKER_STYLE = { radius: 10, color: '#1d4ed8', weight: 2, fillColor: '#f97316', fillOpacity: 1, interactive: false };
         const HIGHLIGHT_POLYGON_STYLE = {
-            color: '#ffffff',      // Color of the extra border
+            color: '#047fff',      // Color of the extra border
             weight: 5,             // Make it thicker than the original border
             opacity: 1,
             fillColor: '#ffffff',  // Transparent fill
@@ -446,6 +498,74 @@
           }
         });
 
+        const floodProneLayer = L.geoJSON(floodProneData, {
+         bubblingMouseEvents: false,
+         filter: hasCoordinates,
+         style: floodProneStyle,
+        });
+
+        const waterwaysFgdLayer = L.geoJSON(waterwaysFgdData, {
+         bubblingMouseEvents: false,
+         filter: hasCoordinates,
+         style: waterwaysFgdStyle,
+        });
+
+        function buildLegend() {
+          const legend = document.getElementById('legend');
+          if (!legend) return;
+          legend.innerHTML = '';
+          const groups = [
+            ['Flood-Prone (FGD)', 'flood', COLOR_BY_FLOOD_COL, 'Default'],
+            ['Waterways (FGD)', 'waterways', COLOR_BY_WATERWAY_DESC, 'Drainage']
+          ];
+          groups.forEach(([title, key, map, fallback]) => {
+            const group = document.createElement('section');
+            group.className = 'legend-group';
+            group.id = 'legend-group-' + key;
+            const heading = document.createElement('h4');
+            heading.textContent = title;
+            group.appendChild(heading);
+            Object.keys(map).forEach(label => {
+              const item = document.createElement('div');
+              item.className = 'legend-item';
+              const swatch = document.createElement('i');
+              swatch.className = 'legend-swatch';
+              swatch.style.background = map[label];
+              if (DASHED_WATERWAY_DESCS.includes(label)) swatch.style.backgroundImage = 'repeating-linear-gradient(45deg,' + map[label] + ' 0, ' + map[label] + ' 3px, #fff 3px, #fff 6px)';
+              const text = document.createElement('span');
+              text.textContent = label;
+              item.appendChild(swatch);
+              item.appendChild(text);
+              group.appendChild(item);
+            });
+            if (fallback) {
+              const item = document.createElement('div');
+              item.className = 'legend-item';
+              const swatch = document.createElement('i');
+              swatch.className = 'legend-swatch';
+              swatch.style.background = fallback === 'Default' ? '#6b7280' : '#2563eb';
+              const text = document.createElement('span');
+              text.textContent = 'default';
+              item.appendChild(swatch);
+              item.appendChild(text);
+              group.appendChild(item);
+            }
+            legend.appendChild(group);
+          });
+        }
+
+        function updateLegend() {
+          const legend = document.getElementById('legend');
+          if (!legend) return;
+          const floodOn = document.getElementById('layer-flood-prone-fgd').checked;
+          const waterwaysOn = document.getElementById('layer-waterways-fgd').checked;
+          const floodGroup = document.getElementById('legend-group-flood');
+          const waterwaysGroup = document.getElementById('legend-group-waterways');
+          if (floodGroup) floodGroup.style.display = floodOn ? '' : 'none';
+          if (waterwaysGroup) waterwaysGroup.style.display = waterwaysOn ? '' : 'none';
+          legend.classList.toggle('visible', floodOn || waterwaysOn);
+        }
+
         setupLayerRow({
           id: 'daet',
           label: 'Daet Boundaries',
@@ -480,6 +600,25 @@
           layer: namriaLayer,
           visible: false
         });
+
+        setupLayerRow({
+          id: 'flood-prone-fgd',
+          label: 'Flood-Prone Areas (FGD)',
+          layer: floodProneLayer,
+          visible: false,
+          onToggle: updateLegend
+        });
+
+        setupLayerRow({
+          id: 'waterways-fgd',
+          label: 'Waterways (FGD)',
+          layer: waterwaysFgdLayer,
+          visible: false,
+          onToggle: updateLegend
+        });
+
+        buildLegend();
+        updateLegend();
 
       } catch (err) {
         const banner = document.getElementById('data-error');
